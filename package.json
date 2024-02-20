@@ -1,0 +1,13 @@
+{
+  "name": "queues",
+  "version": "0.0.0",
+  "private": true,
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.3",
+    "@types/bun": "latest",
+    "mitata": "^0.1.11",
+    "typescript": "latest"
+  }
+}
