@@ -14,8 +14,16 @@
     "noEmit": true,
 
     /* Linting */
-    "strict": true,
     "skipLibCheck": true,
+    "strict": true,
+    "useDefineForClassFields": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "useUnknownInCatchVariables": true, // TODO: This would normally be enabled in `strict` mode but would require some adjustments to the codebase.
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
   }
 }
