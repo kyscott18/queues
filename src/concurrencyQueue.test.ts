@@ -15,7 +15,7 @@ test("add", async () => {
   expect(await promise).toBe(10);
 });
 
-test("size", async () => {
+test("size", () => {
   const queue = createConcurrencyQueue({
     concurrency: 10,
     worker: () => Promise.resolve(10),
@@ -24,6 +24,10 @@ test("size", async () => {
   queue.add();
 
   expect(queue.size()).toBe(1);
+
+  queue.start();
+
+  expect(queue.size()).toBe(0);
 });
 
 test("pending", async () => {
@@ -43,4 +47,44 @@ test("pending", async () => {
   resolve();
 
   expect(await queue.pending()).toBe(0);
+});
+
+test("clear", () => {
+  const queue = createConcurrencyQueue({
+    concurrency: 10,
+    worker: () => Promise.resolve(10),
+  });
+
+  queue.add();
+  queue.add();
+  queue.add();
+
+  queue.clear();
+
+  expect(queue.size()).toBe(0);
+});
+
+test("isStarted", () => {
+  const queue = createConcurrencyQueue({
+    concurrency: 10,
+    worker: () => Promise.resolve(10),
+  });
+
+  expect(queue.isStarted()).toBe(false);
+
+  queue.start();
+
+  expect(queue.isStarted()).toBe(true);
+});
+
+test.todo("start");
+
+test.todo("pause");
+
+test.todo("onIdle");
+
+test.todo("onEmpty");
+
+test.todo("event loop", () => {
+  // test to make sure tasks are switching off when there are more than one queue
 });

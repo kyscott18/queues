@@ -15,6 +15,7 @@ export type ConcurrencyQueue<returnType, parameter> = {
   pending: () => Promise<number>;
   add: (task: parameter) => Promise<returnType>;
   clear: () => void;
+  isStarted: () => boolean;
   start: () => void;
   pause: () => void;
   onIdle: () => Promise<void>;
@@ -92,6 +93,7 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
     clear: () => {
       queue = new Array<Queue<returnType, parameter>[number]>();
     },
+    isStarted: () => isStarted,
     start: () => {
       isStarted = true;
       next();
