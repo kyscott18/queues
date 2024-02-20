@@ -12,10 +12,8 @@ type Queue<returnType, parameter> = {
 export type ConcurrencyQueue<returnType, parameter> = {
   queue: Queue<returnType, parameter>;
   size: () => number;
-  pending: () => number;
-  add: [parameter] extends [never]
-    ? () => Promise<returnType>
-    : (task: parameter) => Promise<returnType>;
+  pending: () => Promise<number>;
+  add: (task: parameter) => Promise<returnType>;
   clear: () => void;
   start: () => void;
   pause: () => void;
@@ -23,7 +21,7 @@ export type ConcurrencyQueue<returnType, parameter> = {
   onEmpty: () => Promise<void>;
 };
 
-export const createConcurrencyQueue = <returnType, parameter = never>({
+export const createConcurrencyQueue = <returnType, parameter = void>({
   concurrency,
   worker,
 }: {
@@ -79,7 +77,10 @@ export const createConcurrencyQueue = <returnType, parameter = never>({
   return {
     queue,
     size: () => queue.length,
-    pending: () => pending,
+    pending: () =>
+      new Promise<number>((resolve) =>
+        process.nextTick(() => resolve(pending)),
+      ),
     add: (task: parameter) => {
       const { promise, resolve, reject } = promiseWithResolvers<returnType>();
       queue.push({ parameter: task, resolve, reject });

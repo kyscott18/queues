@@ -38,9 +38,9 @@ test("pending", async () => {
 
   queue.add();
 
-  expect(queue.pending()).toBe(1);
+  expect(await queue.pending()).toBe(1);
 
   resolve();
 
-  expect(queue.pending()).toBe(0);
+  expect(await queue.pending()).toBe(0);
 });
