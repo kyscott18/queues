@@ -3,17 +3,19 @@ import {
   promiseWithResolvers,
 } from "./promiseWithResolvers";
 
-type Queue<parameter, returnType> = {
+type Queue<returnType, parameter> = {
   parameter: parameter;
   resolve: (arg: returnType) => void;
   reject: (error: Error) => void;
 }[];
 
-export type ConcurrencyQueue<parameter, returnType> = {
-  queue: Queue<parameter, returnType>;
-  size: number;
-  pending: number;
-  add: (task: parameter) => Promise<returnType>;
+export type ConcurrencyQueue<returnType, parameter> = {
+  queue: Queue<returnType, parameter>;
+  size: () => number;
+  pending: () => number;
+  add: [parameter] extends [never]
+    ? () => Promise<returnType>
+    : (task: parameter) => Promise<returnType>;
   clear: () => void;
   start: () => void;
   pause: () => void;
@@ -21,14 +23,14 @@ export type ConcurrencyQueue<parameter, returnType> = {
   onEmpty: () => Promise<void>;
 };
 
-export const createConcurrencyQueue = <parameter, returnType>({
+export const createConcurrencyQueue = <returnType, parameter = never>({
   concurrency,
   worker,
 }: {
   concurrency: number;
   worker: (arg: parameter) => Promise<returnType>;
-}): ConcurrencyQueue<parameter, returnType> => {
-  let queue = new Array<Queue<parameter, returnType>[number]>();
+}): ConcurrencyQueue<returnType, parameter> => {
+  let queue = new Array<Queue<returnType, parameter>[number]>();
   let pending = 0;
   let isStarted = false;
 
@@ -76,8 +78,8 @@ export const createConcurrencyQueue = <parameter, returnType>({
 
   return {
     queue,
-    size: queue.length,
-    pending,
+    size: () => queue.length,
+    pending: () => pending,
     add: (task: parameter) => {
       const { promise, resolve, reject } = promiseWithResolvers<returnType>();
       queue.push({ parameter: task, resolve, reject });
@@ -87,7 +89,7 @@ export const createConcurrencyQueue = <parameter, returnType>({
       return promise;
     },
     clear: () => {
-      queue = new Array<Queue<parameter, returnType>[number]>();
+      queue = new Array<Queue<returnType, parameter>[number]>();
     },
     start: () => {
       isStarted = true;
@@ -120,5 +122,5 @@ export const createConcurrencyQueue = <parameter, returnType>({
       }
       return emptyPromiseWithResolvers.promise;
     },
-  };
+  } as ConcurrencyQueue<returnType, parameter>;
 };
