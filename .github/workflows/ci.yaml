@@ -16,5 +16,7 @@ jobs:
           bun-version: latest
 
       - run: bun install
+      - run: bun run biome format .
+      - run: bun run biome lint .
       - run: bun run tsc
       - run: bun test

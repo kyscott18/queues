@@ -5,9 +5,9 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@biomejs/biome": "^1.5.3",
+    "@biomejs/biome": "latest",
     "@types/bun": "latest",
-    "mitata": "^0.1.11",
+    "mitata": "latest",
     "typescript": "latest"
   }
 }

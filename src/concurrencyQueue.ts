@@ -73,8 +73,6 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
     }
   };
 
-  next();
-
   return {
     queue,
     size: () => queue.length,
@@ -106,6 +104,8 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
         idlePromiseWithResolvers === undefined ||
         idlePromiseWithResolvers.completed
       ) {
+        if (queue.length === 0 && pending === 0) return Promise.resolve();
+
         idlePromiseWithResolvers = {
           ...promiseWithResolvers<void>(),
           completed: false,
@@ -118,6 +118,8 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
         emptyPromiseWithResolvers === undefined ||
         emptyPromiseWithResolvers.completed
       ) {
+        if (queue.length === 0) return Promise.resolve();
+
         emptyPromiseWithResolvers = {
           ...promiseWithResolvers<void>(),
           completed: false,

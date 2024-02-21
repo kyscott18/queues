@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { promiseWithResolvers } from "./promiseWithResolvers";
+import { assertType } from "./type-utils";
 
 test("resolves", async () => {
   const { promise, resolve } = promiseWithResolvers<number>();
@@ -20,11 +21,11 @@ test.skip("rejects", async () => {
 });
 
 test("resolve type", () => {
-  // const { resolve } = promiseWithResolvers<number>();
-  // assertType<(arg: number) => void, typeof resolve>();
+  const { resolve } = promiseWithResolvers<number>();
+  assertType<(arg: number) => void, typeof resolve>();
 });
 
 test("promise type", () => {
-  // const { promise } = promiseWithResolvers<number>();
-  // assertType<Promise<number>, typeof promise>();
+  const { promise } = promiseWithResolvers<number>();
+  assertType<Promise<number>, typeof promise>();
 });
