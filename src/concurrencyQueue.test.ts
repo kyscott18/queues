@@ -3,7 +3,7 @@ import { createConcurrencyQueue } from "./concurrencyQueue";
 import { promiseWithResolvers } from "./promiseWithResolvers";
 import { assertType } from "./type-utils";
 
-test("add", async () => {
+test("add resolves", async () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
     worker: () => Promise.resolve(1),
@@ -14,6 +14,25 @@ test("add", async () => {
   const promise = queue.add();
 
   expect(await promise).toBe(1);
+});
+
+test("add rejects", async () => {
+  let rejected = false;
+
+  const queue = createConcurrencyQueue({
+    concurrency: 1,
+    worker: () => Promise.reject(),
+  });
+
+  const promise = queue.add();
+
+  queue.start();
+
+  await promise.catch(() => {
+    rejected = true;
+  });
+
+  expect(rejected).toBe(true);
 });
 
 test("size", () => {

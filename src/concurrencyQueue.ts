@@ -2,25 +2,7 @@ import {
   type PromiseWithResolvers,
   promiseWithResolvers,
 } from "./promiseWithResolvers";
-
-type Queue<returnType, parameter> = {
-  parameter: parameter;
-  resolve: (arg: returnType) => void;
-  reject: (error: Error) => void;
-}[];
-
-export type ConcurrencyQueue<returnType, parameter> = {
-  queue: Queue<returnType, parameter>;
-  size: () => number;
-  pending: () => Promise<number>;
-  add: (task: parameter) => Promise<returnType>;
-  clear: () => void;
-  isStarted: () => boolean;
-  start: () => void;
-  pause: () => void;
-  onIdle: () => Promise<void>;
-  onEmpty: () => Promise<void>;
-};
+import type { InnerQueue, Queue } from "./queue";
 
 export const createConcurrencyQueue = <returnType, parameter = void>({
   concurrency,
@@ -28,8 +10,8 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
 }: {
   concurrency: number;
   worker: (arg: parameter) => Promise<returnType>;
-}): ConcurrencyQueue<returnType, parameter> => {
-  let queue = new Array<Queue<returnType, parameter>[number]>();
+}): Queue<returnType, parameter> => {
+  let queue = new Array<InnerQueue<returnType, parameter>[number]>();
   let pending = 0;
   let isStarted = false;
 
@@ -89,7 +71,7 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
       return promise;
     },
     clear: () => {
-      queue = new Array<Queue<returnType, parameter>[number]>();
+      queue = new Array<InnerQueue<returnType, parameter>[number]>();
     },
     isStarted: () => isStarted,
     start: () => {
@@ -127,5 +109,5 @@ export const createConcurrencyQueue = <returnType, parameter = void>({
       }
       return emptyPromiseWithResolvers.promise;
     },
-  } as ConcurrencyQueue<returnType, parameter>;
+  } as Queue<returnType, parameter>;
 };
