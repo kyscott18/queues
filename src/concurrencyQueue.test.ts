@@ -1,24 +1,25 @@
 import { expect, test } from "bun:test";
 import { createConcurrencyQueue } from "./concurrencyQueue";
 import { promiseWithResolvers } from "./promiseWithResolvers";
+import { assertType } from "./type-utils";
 
 test("add", async () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(1),
   });
 
   queue.start();
 
   const promise = queue.add();
 
-  expect(await promise).toBe(10);
+  expect(await promise).toBe(1);
 });
 
 test("size", () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(),
   });
 
   queue.add();
@@ -52,7 +53,7 @@ test("pending", async () => {
 test("clear", () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(),
   });
 
   queue.add();
@@ -67,7 +68,7 @@ test("clear", () => {
 test("isStarted", () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(),
   });
 
   expect(queue.isStarted()).toBe(false);
@@ -80,7 +81,7 @@ test("isStarted", () => {
 test("start", async () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(),
   });
 
   const promise = queue.add();
@@ -99,7 +100,7 @@ test("start", async () => {
 test("pause", () => {
   const queue = createConcurrencyQueue({
     concurrency: 1,
-    worker: () => Promise.resolve(10),
+    worker: () => Promise.resolve(),
   });
 
   queue.start();
@@ -240,4 +241,24 @@ test("event loop", async () => {
   }
 
   expect(out).toStrictEqual(expectedOut);
+});
+
+test("parameter type", () => {
+  const queue = createConcurrencyQueue({
+    concurrency: 1,
+    worker: (_arg: "a" | "b" | "c") => Promise.resolve(),
+  });
+
+  assertType<Parameters<typeof queue.add>[0], "a" | "b" | "c">();
+});
+
+test("return type", () => {
+  const queue = createConcurrencyQueue({
+    concurrency: 1,
+    worker: () => {
+      return undefined as unknown as Promise<1 | 2 | 3>;
+    },
+  });
+
+  assertType<ReturnType<typeof queue.add>, Promise<1 | 2 | 3>>();
 });
