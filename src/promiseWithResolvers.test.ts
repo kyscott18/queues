@@ -12,12 +12,18 @@ test("resolves", async () => {
   expect(value).toBe(1);
 });
 
-test.skip("rejects", async () => {
+test("rejects", async () => {
+  let rejected = false;
+
   const { promise, reject } = promiseWithResolvers();
 
-  reject(new Error());
+  promise.catch(() => {
+    rejected = true;
+  });
 
-  expect(async () => await promise).toThrow();
+  await Promise.reject().catch(reject);
+
+  expect(rejected).toBe(true);
 });
 
 test("resolve type", () => {
