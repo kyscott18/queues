@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { createConcurrencyQueue } from "./concurrencyQueue";
+import { createFrequencyQueue } from "./frequencyQueue";
 import { promiseWithResolvers } from "./promiseWithResolvers";
 import { assertType } from "./type-utils";
 
 test("add resolves", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(1),
   });
 
@@ -19,8 +19,8 @@ test("add resolves", async () => {
 test("add rejects", async () => {
   let rejected = false;
 
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.reject(),
   });
 
@@ -36,8 +36,8 @@ test("add rejects", async () => {
 });
 
 test("size", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -53,8 +53,8 @@ test("size", () => {
 test("pending", async () => {
   const { promise, resolve } = promiseWithResolvers<void>();
 
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => promise,
   });
 
@@ -70,8 +70,8 @@ test("pending", async () => {
 });
 
 test("clear", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -85,8 +85,8 @@ test("clear", () => {
 });
 
 test("isStarted", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -98,8 +98,8 @@ test("isStarted", () => {
 });
 
 test("start", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -117,8 +117,8 @@ test("start", async () => {
 });
 
 test("pause", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -131,8 +131,8 @@ test("pause", () => {
 });
 
 test("onIdle short loop", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -140,8 +140,8 @@ test("onIdle short loop", async () => {
 });
 
 test("onIdle", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -155,8 +155,8 @@ test("onIdle", async () => {
 });
 
 test("onIdle twice", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -178,8 +178,8 @@ test("onIdle twice", async () => {
 });
 
 test("onEmpty short loop", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -187,8 +187,8 @@ test("onEmpty short loop", async () => {
 });
 
 test("onEmpty", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -202,8 +202,8 @@ test("onEmpty", async () => {
 });
 
 test("onEmpty twice", async () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => Promise.resolve(),
   });
 
@@ -224,49 +224,13 @@ test("onEmpty twice", async () => {
   await promise;
 });
 
-test.todo("concurrency");
+test.todo("frequency");
 
-test("event loop", async () => {
-  const out: number[] = [];
-
-  const queue1 = createConcurrencyQueue({
-    concurrency: 1,
-    worker: () => {
-      out.push(1);
-      return Promise.resolve();
-    },
-  });
-
-  const queue2 = createConcurrencyQueue({
-    concurrency: 1,
-    worker: () => {
-      out.push(2);
-      return Promise.resolve();
-    },
-  });
-
-  for (let i = 0; i < 10; i++) {
-    queue1.add();
-    queue2.add();
-  }
-
-  queue1.start();
-  queue2.start();
-
-  await Promise.all([queue1.onIdle(), queue2.onIdle()]);
-
-  const expectedOut: number[] = [];
-
-  for (let i = 0; i < 10; i++) {
-    expectedOut.push(1, 2);
-  }
-
-  expect(out).toStrictEqual(expectedOut);
-});
+test.todo("event loop");
 
 test("parameter type", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: (_arg: "a" | "b" | "c") => Promise.resolve(),
   });
 
@@ -274,8 +238,8 @@ test("parameter type", () => {
 });
 
 test("return type", () => {
-  const queue = createConcurrencyQueue({
-    concurrency: 1,
+  const queue = createFrequencyQueue({
+    frequency: 1,
     worker: () => {
       return undefined as unknown as Promise<1 | 2 | 3>;
     },
