@@ -224,7 +224,22 @@ test("onEmpty twice", async () => {
   await promise;
 });
 
-test.todo("concurrency");
+test("concurrency", () => {
+  const queue = createConcurrencyQueue({
+    concurrency: 2,
+    worker: () => Promise.resolve(),
+  });
+
+  queue.add();
+  queue.add();
+  queue.add();
+  queue.add();
+
+  queue.start();
+  queue.pause();
+
+  expect(queue.size()).toBe(2);
+});
 
 test("event loop", async () => {
   const out: number[] = [];
