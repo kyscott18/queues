@@ -92,6 +92,8 @@ export const createFrequencyQueue = <returnType, parameter = void>({
     },
     clear: () => {
       queue = new Array<InnerQueue<returnType, parameter>[number]>();
+      clearTimeout(timer);
+      timer = undefined;
     },
     isStarted: () => isStarted,
     start: () => {

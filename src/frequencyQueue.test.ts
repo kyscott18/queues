@@ -84,6 +84,25 @@ test("clear", () => {
   expect(queue.size()).toBe(0);
 });
 
+test("clear timer", async () => {
+  const queue = createFrequencyQueue({
+    frequency: 1,
+    worker: () => Promise.resolve(),
+  });
+
+  queue.add();
+  queue.add();
+  queue.add();
+
+  queue.start();
+  queue.clear();
+
+  await queue.onIdle();
+
+  expect(queue.size()).toBe(0);
+  expect(await queue.pending()).toBe(0);
+});
+
 test("isStarted", () => {
   const queue = createFrequencyQueue({
     frequency: 1,
@@ -156,7 +175,7 @@ test("onIdle", async () => {
 
 test("onIdle twice", async () => {
   const queue = createFrequencyQueue({
-    frequency: 1,
+    frequency: 1_000,
     worker: () => Promise.resolve(),
   });
 
@@ -203,7 +222,7 @@ test("onEmpty", async () => {
 
 test("onEmpty twice", async () => {
   const queue = createFrequencyQueue({
-    frequency: 1,
+    frequency: 1_000,
     worker: () => Promise.resolve(),
   });
 
@@ -224,7 +243,25 @@ test("onEmpty twice", async () => {
   await promise;
 });
 
-test.todo("frequency");
+test("frequency", async () => {
+  const queue = createFrequencyQueue({
+    frequency: 2,
+    worker: () => Promise.resolve(),
+  });
+
+  queue.add();
+  queue.add();
+  queue.add();
+  queue.add();
+
+  queue.start();
+
+  expect(queue.size()).toBe(2);
+
+  await new Promise((resolve) => setTimeout(resolve, 1_000));
+
+  expect(queue.size()).toBe(0);
+});
 
 test.todo("event loop");
 
