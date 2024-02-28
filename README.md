@@ -12,11 +12,11 @@ No limit on response size. Max block range 800.
 
 ## Alchemy
 
-10k logs limit on response size. No max block range.
+10k logs limit on response size when block range > 2,000.
 
 ## Ankr
 
-No limit on response size. Max block range ~2,900.
+No limit on response size. Max block range 3,000.
 
 ## Quicknode
 
