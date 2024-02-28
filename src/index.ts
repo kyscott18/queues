@@ -5,3 +5,4 @@ export {
   type PromiseWithResolvers,
 } from "./promiseWithResolvers";
 export type { Queue } from "./queue";
+export { retry } from "./retry";

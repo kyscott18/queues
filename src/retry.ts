@@ -15,6 +15,7 @@ export const retry = async <returnType>(
     // biome-ignore lint/suspicious/noExplicitAny: errors don't have types
     let error: any;
     let hasError = false;
+
     for (let i = 0; i < retries + 1; i++) {
       try {
         const out = await callback();
