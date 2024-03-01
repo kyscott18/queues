@@ -1,4 +1,6 @@
-export const retry = async <returnType>(
+import { promiseWithResolvers } from ".";
+
+export const retry = <returnType>(
   callback: () => Promise<returnType>,
   {
     retries = 3,
@@ -9,13 +11,16 @@ export const retry = async <returnType>(
     timeout?: number;
     exponential?: boolean;
   } = { retries: 3, timeout: 100, exponential: true },
-): Promise<returnType> => {
-  // biome-ignore lint/suspicious/noAsyncPromiseExecutor: wrong
-  return new Promise(async (resolve, reject) => {
-    // biome-ignore lint/suspicious/noExplicitAny: errors don't have types
-    let error: any;
-    let hasError = false;
+): { promise: Promise<returnType>; cancel: () => void } => {
+  const { promise, resolve, reject } = promiseWithResolvers<returnType>();
 
+  // biome-ignore lint/suspicious/noExplicitAny: no
+  let error: any;
+  let hasError = false;
+
+  let timer: Timer;
+
+  const process = async () => {
     for (let i = 0; i < retries + 1; i++) {
       try {
         const out = await callback();
@@ -26,11 +31,25 @@ export const retry = async <returnType>(
           hasError = true;
           error = _error;
         }
-        await new Promise((_resolve) =>
-          setTimeout(_resolve, exponential ? timeout * 2 ** i : timeout),
-        );
+
+        await new Promise((_resolve) => {
+          timer = setTimeout(
+            _resolve,
+            exponential ? timeout * 2 ** i : timeout,
+          );
+        });
       }
     }
     reject(error);
-  });
+  };
+
+  process();
+
+  return {
+    promise,
+    cancel: () => {
+      clearTimeout(timer);
+      reject(new Error("Retry canceled"));
+    },
+  };
 };

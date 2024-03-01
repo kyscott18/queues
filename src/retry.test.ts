@@ -5,13 +5,13 @@ import { assertType } from "./type-utils";
 test("returns with no errors", async () => {
   const callback = () => Promise.resolve(1);
   const out = retry(callback);
-  expect(await out).toBe(1);
+  expect(await out.promise).toBe(1);
 });
 
 test("returnType", () => {
   const callback = () => Promise.resolve(1 as const);
   const out = retry(callback);
-  assertType<Promise<1>, typeof out>();
+  assertType<Promise<1>, typeof out.promise>();
 });
 
 test("retries", async () => {
@@ -24,9 +24,31 @@ test("retries", async () => {
       return Promise.resolve();
     },
     { timeout: 1 },
-  );
+  ).promise;
 
   expect(i).toBe(2);
+});
+
+test("cancel", async () => {
+  let rejected = false;
+
+  const out = retry(
+    () => {
+      return Promise.reject();
+    },
+    {
+      timeout: 1_000,
+      exponential: true,
+    },
+  );
+
+  out.cancel();
+
+  await out.promise.catch((e) => {
+    if (e.message === "Retry canceled") rejected = true;
+  });
+
+  expect(rejected).toBe(true);
 });
 
 test.todo("calculates timeout");
@@ -47,7 +69,7 @@ test("throws error", async () => {
       timeout: 1,
       exponential: false,
     },
-  );
+  ).promise;
 
   await out.catch(() => {
     rejected = true;
