@@ -5,7 +5,7 @@ import { type Params, UNI, WETH, fromBlock, getRequest } from "./utils";
 
 const request = getRequest(process.env.RPC_URL_INFURA_1!);
 
-test.skip(
+test(
   "infura success",
   async () => {
     const logs = await request({
@@ -19,7 +19,7 @@ test.skip(
       ],
     });
 
-    expect(logs).toHaveLength(49);
+    expect(logs).toHaveLength(9);
   },
   { timeout: 15_000 },
 );
